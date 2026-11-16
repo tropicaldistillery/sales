@@ -20,6 +20,7 @@ nav a{color:var(--ink);text-decoration:none;font-size:13px;padding:5px 10px;bord
 nav a:hover{border-color:var(--brand);color:var(--brand)}
 main{max-width:1180px;margin:0 auto;padding:20px 24px 60px}
 section{margin:28px 0}
+table.r12 th,table.r12 td{padding:5px 6px;font-size:12px}table.r12 tr.tot td{font-weight:700;border-top:2px solid #999}
 h2{font-size:17px;margin:0 0 4px}
 .sub{color:var(--muted);font-size:12.5px;margin:2px 0 10px;max-width:80em}
 .lede{margin:6px 0 10px}
@@ -55,7 +56,7 @@ footer{color:var(--muted);font-size:12px;border-top:1px solid var(--line);paddin
   <div class="upd">Updated <b id="upd"></b><br><span id="srcline"></span></div>
 </header>
 <nav>
-  <a href="#summary">Summary</a><a href="#risks">Call-outs</a><a href="#states">By state</a><a href="#brands">By brand</a><a href="#inventory">Inventory &amp; POs</a><a href="#pending">Pending shipments</a><a href="#newaccts">New accounts</a><a href="#lost">Lost accounts</a>
+  <a href="#summary">Summary</a><a href="#risks">Call-outs</a><a href="#states">By state</a><a href="#brands">By brand</a><a href="#r12">Rolling 12</a><a href="#inventory">Inventory &amp; POs</a><a href="#pending">Pending shipments</a><a href="#newaccts">New accounts</a><a href="#lost">Lost accounts</a>
 </nav>
 <main>
 <section id="summary">
@@ -69,6 +70,13 @@ footer{color:var(--muted);font-size:12px;border-top:1px solid var(--line);paddin
   <p class="note"><b>* Bailment states (Pennsylvania, Virginia, Iowa): depletions are not accurate.</b> Use shipments until we pull the state sales reports. California last year includes a one-time 1,600-case Cursed Cranberry order.</p>
 </section>
 <section id="brands"><h2>By brand</h2><p class="sub">Casa Loco is a commission brand and isn't counted in totals.</p><div class="tw"><table id="brt"></table></div></section>
+<section id="r12">
+  <h2>Rolling 12 months: shipments by state and SKU</h2>
+  <p class="sub" id="r12sub"></p>
+  <p class="lede" id="r12lede"></p>
+  <div class="bar"><label for="r12st">Show</label><select id="r12st"></select></div>
+  <div class="tw"><table id="r12t" class="r12"></table></div>
+</section>
 <section id="inventory">
   <h2>Inventory and PO flags</h2>
   <p class="sub">On hand at the distributor. On order = Reyes POs + pending DISTILL x 5 orders. Weekly pace = last 90 days of sales, +14% for the holidays. <b>Order now</b>: stock won't cover a 3-week lead time + 4 weeks. <b>Watch</b>: won't cover lead time + 8 weeks. Suggested PO gets back to 8 weeks of cover. Heavy = over 120 days on hand.</p>
@@ -121,6 +129,24 @@ $('stt').innerHTML='<tr><th>State</th><th>Ship YTD</th><th>Ship LY</th><th>Ship 
  return `<tr><td>${esc(r.state)}${c?' *':''}</td><td>${f0(r.ship_ytd)}</td><td>${f0(r.ship_ly)}</td><td>${fd(r.rev_ytd)}</td><td>${fd(r.rev_ly)}</td>${d(r.depl_mtd)}${d(r.depl_mtd_ly)}${d(r.depl_ytd)}${d(r.depl_ly)}<td class="${c?'ctl':cls(r.depl_ytd,r.depl_ly)}">${c||!(N(r.depl_ytd)||N(r.depl_ly))?'':pct(r.depl_ytd,r.depl_ly)}</td><td>${f0(r.accts_ytd)}</td><td>${f0(r.accts_ly)}</td></tr>`}).join('');
 $('brt').innerHTML='<tr><th>Brand</th><th>Ship YTD</th><th>Ship LY</th><th>Ship $ YTD</th><th>Ship $ LY</th><th>Depl MTD</th><th>MTD LY</th><th>Depl YTD</th><th>Depl LY</th><th>Change</th></tr>'+
  D.brands.map(r=>`<tr><td>${esc(r.brand)}${r.line==='Commission brand'?' <span class="s">(commission)</span>':''}</td><td>${f0(r.ship_ytd)}</td><td>${f0(r.ship_ly)}</td><td>${fd(r.rev_ytd)}</td><td>${fd(r.rev_ly)}</td><td>${f0(r.depl_mtd)}</td><td>${f0(r.depl_mtd_ly)}</td><td>${f0(r.depl_ytd)}</td><td>${f0(r.depl_ly)}</td><td class="${cls(r.depl_ytd,r.depl_ly)}">${N(r.depl_ytd)||N(r.depl_ly)?pct(r.depl_ytd,r.depl_ly):''}</td></tr>`).join('');
+// rolling 12
+const R=D.r12||[],RM=D.r12_months||[],mk=RM.map((_,i)=>'m'+String(i+1).padStart(2,'0'));
+if(R.length){
+ const roll=k=>{const o={};R.forEach(r=>{const g=o[r[k]]||(o[r[k]]={name:r[k],r12:0,prior:0});mk.forEach(m=>g[m]=(g[m]||0)+N(r[m]));g.r12+=N(r.r12);g.prior+=N(r.prior);});return Object.values(o).sort((a,b)=>b.r12-a.r12)};
+ const tot=rows=>{const t={name:'Total',r12:0,prior:0};rows.forEach(r=>{mk.forEach(m=>t[m]=(t[m]||0)+N(r[m]));t.r12+=N(r.r12);t.prior+=N(r.prior)});return t};
+ const ST=roll('state'),T=tot(R);
+ $('r12sub').textContent=`Physical cases shipped, DISTILL x 5 (Jensen's Vodka from QuickBooks). Last 12 complete months, ${RM[0]} – ${RM[RM.length-1]}, vs the 12 months before. Excludes TD Retail samples and Casa Loco.`;
+ const up=ST.filter(s=>s.prior&&s.r12>s.prior).length,dn=ST.filter(s=>s.r12<s.prior).length;
+ $('r12lede').innerHTML=`<b>${f0(T.r12)}</b> cases over the last 12 months, <span class="${cls(T.r12,T.prior)}">${pct(T.r12,T.prior)}</span> vs the prior 12 (${f0(T.prior)}). ${up} states up, ${dn} down.`;
+ $('r12st').innerHTML='<option value="">All states (state totals)</option>'+ST.map(s=>`<option value="${esc(s.name)}">${esc(s.name)}</option>`).join('');
+ const row=(lab,r,c)=>`<tr${c?' class="tot"':''}><td class="l">${lab}</td>${mk.map(m=>`<td>${N(r[m])?f0(r[m]):'·'}</td>`).join('')}<td><b>${f0(r.r12)}</b></td><td>${f0(r.prior)}</td><td class="${cls(r.r12,r.prior)}">${N(r.r12)||N(r.prior)?pct(r.r12,r.prior):''}</td></tr>`;
+ function r12(){const s=$('r12st').value,hd=`<tr><th class="l">${s?'SKU':'State'}</th>${RM.map(m=>`<th>${m}</th>`).join('')}<th>12 mo</th><th>Prior 12</th><th>Change</th></tr>`;
+  if(!s){$('r12t').innerHTML=hd+ST.map(r=>row(`<a href="#r12" data-s="${esc(r.name)}">${esc(r.name)}</a>`,r)).join('')+row('Total, all states',T,1);
+   $('r12t').querySelectorAll('a[data-s]').forEach(a=>a.onclick=e=>{e.preventDefault();$('r12st').value=a.dataset.s;r12();});return;}
+  const rows=R.filter(r=>r.state===s).sort((a,b)=>N(b.r12)-N(a.r12));
+  $('r12t').innerHTML=hd+rows.map(r=>row(esc(r.sku),r)).join('')+row('Total, '+esc(s),tot(rows),1);}
+ $('r12st').onchange=r12;r12();
+}else{$('r12').style.display='none';}
 // inventory
 const now=D.inventory.filter(r=>r.status==='Order now');const byS={};now.forEach(r=>byS[r.state]=(byS[r.state]||0)+N(r.suggested_po));
 $('invlede').innerHTML=`<b>${now.length}</b> SKUs need a PO now (<b>${f0(sum(now,'suggested_po'))}</b> cases): ${Object.entries(byS).sort((a,b)=>b[1]-a[1]).map(([s,n])=>esc(s)+' '+f0(n)).join(' · ')}.`;
