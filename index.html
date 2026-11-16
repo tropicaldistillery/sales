@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Daily Sales Snapshot – Tropical Distillery</title>
+<link rel="icon" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{--ink:#16232b;--muted:#5d6b73;--line:#e3e8ea;--panel:#f6f8f8;--brand:#0f6e66;--good:#1b7f3b;--bad:#b3261e;--warn:#9a6700}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#fff}
+header{display:flex;align-items:center;gap:14px;padding:18px 24px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:5}
+header img{height:40px}
+header h1{font-size:20px;margin:0;font-weight:650}
+header .upd{margin-left:auto;color:var(--muted);font-size:12px;text-align:right}
+nav{display:flex;gap:6px;flex-wrap:wrap;padding:10px 24px;border-bottom:1px solid var(--line);background:var(--panel)}
+nav a{color:var(--ink);text-decoration:none;font-size:13px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:#fff}
+nav a:hover{border-color:var(--brand);color:var(--brand)}
+main{max-width:1180px;margin:0 auto;padding:20px 24px 60px}
+section{margin:28px 0}
+h2{font-size:17px;margin:0 0 4px}
+.sub{color:var(--muted);font-size:12.5px;margin:2px 0 10px;max-width:80em}
+.lede{margin:6px 0 10px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.card{border:1px solid var(--line);border-radius:10px;padding:14px;background:#fff}
+.card .k{font-size:12px;color:var(--muted)}
+.card .v{font-size:26px;font-weight:650;margin:4px 0;font-variant-numeric:tabular-nums}
+.card .c{font-size:12px;color:var(--muted)}
+.good{color:var(--good)}.bad{color:var(--bad)}
+ul.risks{padding-left:18px;margin:6px 0}ul.risks li{margin:6px 0}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;vertical-align:top}
+th:first-child,td:first-child,th.l{text-align:left}
+th{background:var(--panel);color:var(--muted);font-weight:600;position:sticky;top:0}
+td.l{text-align:left;white-space:normal}
+td .s{color:var(--muted);font-size:11.5px}
+.ctl{color:var(--muted);font-style:italic}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:600}
+.p-now{background:#fde7e5;color:var(--bad)}.p-watch{background:#fff3d6;color:var(--warn)}.p-ok{background:#e4f4e8;color:var(--good)}.p-heavy{background:#eef1f3;color:var(--muted)}
+.bar{display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap}
+select{font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.scroll{max-height:520px;overflow:auto}
+.note{font-size:12px;color:var(--muted);margin-top:8px;padding:8px 10px;border-left:3px solid var(--warn);background:#fffaf0}
+footer{color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding:16px 24px;text-align:center}
+@media(max-width:640px){header h1{font-size:16px}main{padding:14px}}
+</style>
+</head>
+<body>
+<header>
+  <img src="logo.png" alt="Tropical Distillery" onerror="this.style.display='none'">
+  <h1 id="ttl">Daily Sales Snapshot</h1>
+  <div class="upd">Updated <b id="upd"></b><br><span id="srcline"></span></div>
+</header>
+<nav>
+  <a href="#summary">Summary</a><a href="#risks">Call-outs</a><a href="#states">By state</a><a href="#brands">By brand</a><a href="#inventory">Inventory &amp; POs</a><a href="#pending">Pending shipments</a><a href="#newaccts">New accounts</a><a href="#lost">Lost accounts</a>
+</nav>
+<main>
+<section id="summary">
+  <div class="cards" id="cards"></div>
+</section>
+<section id="risks"><h2>Call-outs and risks</h2><ul class="risks" id="risklist"></ul></section>
+<section id="states">
+  <h2>By state</h2>
+  <p class="sub">Sorted by shipments. Depletions: Reyes states from Power BI, CA/NV from Salient, Monarq/LibDib/Mississippi = shipments, others VIP. MTD is Nov 1–13.</p>
+  <div class="tw"><table id="stt"></table></div>
+  <p class="note"><b>* Bailment states (Pennsylvania, Virginia, Iowa): depletions are not accurate.</b> Use shipments until we pull the state sales reports. California last year includes a one-time 1,600-case Cursed Cranberry order.</p>
+</section>
+<section id="brands"><h2>By brand</h2><p class="sub">Casa Loco is a commission brand and isn't counted in totals.</p><div class="tw"><table id="brt"></table></div></section>
+<section id="inventory">
+  <h2>Inventory and PO flags</h2>
+  <p class="sub">On hand at the distributor. On order = Reyes POs + pending DISTILL x 5 orders. Weekly pace = last 90 days of sales, +14% for the holidays. <b>Order now</b>: stock won't cover a 3-week lead time + 4 weeks. <b>Watch</b>: won't cover lead time + 8 weeks. Suggested PO gets back to 8 weeks of cover. Heavy = over 120 days on hand.</p>
+  <p class="lede" id="invlede"></p>
+  <div class="bar"><label for="invst">State</label><select id="invst"></select><span class="sub" id="invsrc"></span></div>
+  <div class="tw"><table id="invt"></table></div>
+</section>
+<section id="pending"><h2>Pending shipments (DISTILL x 5)</h2><p class="sub">Entered in DISTILL x 5, not yet shipped or invoiced. Over 3 weeks waiting is flagged.</p><p class="lede" id="pendlede"></p><div class="tw"><table id="pendt"></table></div></section>
+<section id="newaccts">
+  <h2>New accounts (last 45 days)</h2>
+  <p class="sub">First purchase of the year came in the last 45 days (VIP). Florida is split into Miami, South (rest of the Deerfield house) and North (Tampa, Jacksonville, Pensacola).</p>
+  <p class="lede" id="newlede"></p>
+  <div class="bar"><label for="newst">State</label><select id="newst"></select><span class="sub" id="newshown"></span></div>
+  <div class="tw scroll"><table id="newt"></table></div>
+</section>
+<section id="lost">
+  <h2>Lost Accounts (45+ no buy)</h2>
+  <p class="sub">Bought this year, nothing in the last 45+ days (VIP). "Concern?" compares their last order to their own buying pace: if it should have lasted until now they likely stocked up; if not, they're running late or overdue.</p>
+  <p class="lede" id="lostlede"></p>
+  <div class="bar"><label for="lostst">State</label><select id="lostst"></select><label for="lostv">Show</label><select id="lostv"><option value="">All</option><option value="Concern">Overdue</option><option value="Watch">Running late</option><option value="Likely">Likely stocked up</option><option value="One-time">One-time buys</option></select><span class="sub" id="lostshown"></span></div>
+  <div class="tw scroll"><table id="lostt"></table></div>
+</section>
+<p class="sub" id="notes"></p>
+</main>
+<footer>Tropical Distillery · internal sales report · please don't forward</footer>
+<script src="data.js"></script>
+<script>
+const D=window.D,N=v=>+v||0,f0=v=>Math.round(N(v)).toLocaleString('en-US'),fd=v=>'$'+Math.round(N(v)).toLocaleString('en-US');
+const pct=(a,b)=>!N(b)?'new':((a-b)/b*100>=0?'+':'')+Math.round((a-b)/b*100)+'%';
+const cls=(a,b)=>!N(b)?'':(a>=b?'good':'bad');
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+$('upd').textContent=D.updated;$('ttl').textContent=D.day+' – Daily Sales Snapshot';document.title=D.day+' – Daily Sales Snapshot';$('notes').textContent=D.notes;
+const P=m=>D.portfolio.find(r=>r.measure===m)||{};
+const jf=D.brands.filter(r=>r.line==="J.F. Haden's"),sum=(a,k)=>a.reduce((t,r)=>t+N(r[k]),0);
+const card=(k,v,ly,fmt,c)=>`<div class="card"><div class="k">${k}</div><div class="v">${fmt(v)}</div><div class="c"><span class="${cls(v,ly)}">${pct(v,ly)}</span> vs last year${c?' · '+c:''}</div></div>`;
+$('cards').innerHTML=[
+ card('Total shipments, YTD',P('Shipments').ytd,P('Shipments').ly,f0,'all products incl. RTDs'),
+ card('Shipment revenue, YTD',P('Shipment revenue').ytd,P('Shipment revenue').ly,fd,'QuickBooks, gross'),
+ card('Total depletions, YTD',P('Depletions').ytd,P('Depletions').ly,f0,'all brands'),
+ card("J.F. Haden's shipments",sum(jf,'ship_ytd'),sum(jf,'ship_ly'),f0),
+ card("J.F. Haden's depletions",sum(jf,'depl_ytd'),sum(jf,'depl_ly'),f0),
+ card('Nov depletions to date',sum(jf,'depl_mtd'),sum(jf,'depl_mtd_ly'),f0,"J.F. Haden's"),
+ card('Accounts buying, YTD',sum(D.states,'accts_ytd'),sum(D.states,'accts_ly'),f0),
+ card('Samples pulled (TD Retail)',P('TD Retail samples').ytd,P('TD Retail samples').ly,f0,'not in shipments')].join('');
+$('risklist').innerHTML=D.risks.map(r=>`<li>${r}</li>`).join('');
+const ctl=['PA','VA','IA'];
+$('stt').innerHTML='<tr><th>State</th><th>Ship YTD</th><th>Ship LY</th><th>Ship $ YTD</th><th>Ship $ LY</th><th>Depl MTD</th><th>MTD LY</th><th>Depl YTD</th><th>Depl LY</th><th>Change</th><th>Accts</th><th>Accts LY</th></tr>'+
+ D.states.slice().sort((a,b)=>N(b.ship_ytd)-N(a.ship_ytd)||N(b.depl_ytd)-N(a.depl_ytd)).map(r=>{const c=ctl.includes(r.code),d=x=>c?'<td class="ctl">—</td>':`<td>${f0(x)}</td>`;
+ return `<tr><td>${esc(r.state)}${c?' *':''}</td><td>${f0(r.ship_ytd)}</td><td>${f0(r.ship_ly)}</td><td>${fd(r.rev_ytd)}</td><td>${fd(r.rev_ly)}</td>${d(r.depl_mtd)}${d(r.depl_mtd_ly)}${d(r.depl_ytd)}${d(r.depl_ly)}<td class="${c?'ctl':cls(r.depl_ytd,r.depl_ly)}">${c||!(N(r.depl_ytd)||N(r.depl_ly))?'':pct(r.depl_ytd,r.depl_ly)}</td><td>${f0(r.accts_ytd)}</td><td>${f0(r.accts_ly)}</td></tr>`}).join('');
+$('brt').innerHTML='<tr><th>Brand</th><th>Ship YTD</th><th>Ship LY</th><th>Ship $ YTD</th><th>Ship $ LY</th><th>Depl MTD</th><th>MTD LY</th><th>Depl YTD</th><th>Depl LY</th><th>Change</th></tr>'+
+ D.brands.map(r=>`<tr><td>${esc(r.brand)}${r.line==='Commission brand'?' <span class="s">(commission)</span>':''}</td><td>${f0(r.ship_ytd)}</td><td>${f0(r.ship_ly)}</td><td>${fd(r.rev_ytd)}</td><td>${fd(r.rev_ly)}</td><td>${f0(r.depl_mtd)}</td><td>${f0(r.depl_mtd_ly)}</td><td>${f0(r.depl_ytd)}</td><td>${f0(r.depl_ly)}</td><td class="${cls(r.depl_ytd,r.depl_ly)}">${N(r.depl_ytd)||N(r.depl_ly)?pct(r.depl_ytd,r.depl_ly):''}</td></tr>`).join('');
+// inventory
+const now=D.inventory.filter(r=>r.status==='Order now');const byS={};now.forEach(r=>byS[r.state]=(byS[r.state]||0)+N(r.suggested_po));
+$('invlede').innerHTML=`<b>${now.length}</b> SKUs need a PO now (<b>${f0(sum(now,'suggested_po'))}</b> cases): ${Object.entries(byS).sort((a,b)=>b[1]-a[1]).map(([s,n])=>esc(s)+' '+f0(n)).join(' · ')}.`;
+const ist=[...new Set(D.inventory.map(r=>r.state))].sort();
+$('invst').innerHTML=ist.map(s=>{const n=now.filter(r=>r.state===s).length;return `<option value="${esc(s)}"${s==='Florida'?' selected':''}>${esc(s)}${n?' ('+n+' to order)':''}</option>`}).join('');
+const pill=s=>`<span class="pill ${s==='Order now'?'p-now':s==='Watch'?'p-watch':s==='OK'?'p-ok':'p-heavy'}">${esc(s)}</span>`;
+function inv(){const s=$('invst').value,rows=D.inventory.filter(r=>r.state===s);$('invsrc').textContent=rows[0]?'Source: '+rows[0].source:'';
+ $('invt').innerHTML='<tr><th>SKU</th><th>On hand</th><th>On order</th><th>Weekly pace</th><th>Days on hand</th><th>Needs PO?</th><th>Suggested PO</th></tr>'+rows.map(r=>`<tr><td>${esc(r.sku)}</td><td>${f0(r.on_hand)}</td><td>${N(r.on_order)?f0(r.on_order):'—'}</td><td>${N(r.weekly_pace).toFixed(1)}</td><td>${r.days_on_hand===''||r.days_on_hand==null?'—':f0(r.days_on_hand)}</td><td>${pill(r.status)}</td><td class="${N(r.suggested_po)?'bad':''}">${N(r.suggested_po)?f0(r.suggested_po):'—'}</td></tr>`).join('');}
+$('invst').onchange=inv;inv();
+// pending
+const ord=new Map();D.pending.forEach(r=>ord.set(r.order_no,N(r.order_total)));
+$('pendlede').innerHTML=`<b>${ord.size}</b> orders, <b>${f0(sum(D.pending,'cases'))}</b> cases, <b>${fd([...ord.values()].reduce((a,b)=>a+b,0))}</b> waiting to ship.`;
+$('pendt').innerHTML='<tr><th>Ordered</th><th class="l">Customer</th><th class="l">Product</th><th>Cases</th><th>Days waiting</th></tr>'+D.pending.slice().sort((a,b)=>N(b.days_waiting)-N(a.days_waiting)).map(r=>`<tr><td>${esc(r.order_date)}</td><td class="l">${esc(r.customer)} · ${esc(r.state)}</td><td class="l">${esc(r.product)}</td><td>${f0(r.cases)}</td><td class="${N(r.days_waiting)>21?'bad':''}">${f0(r.days_waiting)}</td></tr>`).join('');
+// state pickers
+function picker(sel,rows){const st=[...new Set(rows.map(r=>r.state))].sort();$(sel).innerHTML='<option value="">All states</option>'+st.map(s=>`<option value="${esc(s)}">${esc(s)} (${rows.filter(r=>r.state===s).length})</option>`).join('');}
+const acct=r=>`<td class="l">${esc(r.account)}<div class="s">${esc([r.city,r.state,r.premise].filter(Boolean).join(' · '))}</div></td>`;
+picker('newst',D.new_accounts);
+const nc={};D.new_accounts.forEach(r=>nc[r.state]=(nc[r.state]||0)+1);
+$('newlede').innerHTML=`<b>${D.new_accounts.length}</b> new accounts, <b>${f0(sum(D.new_accounts,'cases'))}</b> cases. `+Object.entries(nc).sort((a,b)=>b[1]-a[1]).map(([s,n])=>esc(s)+' '+n).join(' · ');
+function newt(){const s=$('newst').value,rows=D.new_accounts.filter(r=>!s||r.state===s).sort((a,b)=>N(b.cases)-N(a.cases));$('newshown').textContent=rows.length+' shown';
+ $('newt').innerHTML='<tr><th>Account</th><th class="l">Brands</th><th>Cases</th></tr>'+rows.map(r=>`<tr>${acct(r)}<td class="l">${esc(r.brands)}</td><td>${f0(r.cases)}</td></tr>`).join('');}
+$('newst').onchange=newt;newt();
+picker('lostst',D.lost);
+const vc=k=>D.lost.filter(r=>String(r.velocity).startsWith(k)).length;
+$('lostlede').innerHTML=`<b>${f0(D.lost.length)}</b> accounts. Based on their buying pace, <b>${vc('Concern')}</b> are overdue, <b>${vc('Watch')}</b> are running late, and <b>${vc('Likely')}</b> likely stocked up. <b>${vc('One-time')}</b> only ordered once. <b>${D.lost.filter(r=>/RNDC/.test(r.check)).length}</b> are former RNDC accounts to confirm at Reyes.`;
+function lost(){const s=$('lostst').value,v=$('lostv').value,rows=D.lost.filter(r=>(!s||r.state===s)&&(!v||String(r.velocity).startsWith(v))).sort((a,b)=>N(b.ytd)-N(a.ytd)||N(b.last_month_cases)-N(a.last_month_cases));$('lostshown').textContent=rows.length+' shown';
+ $('lostt').innerHTML='<tr><th>Account</th><th class="l">Brands</th><th>Cases YTD</th><th>Last month bought</th><th>Cases that month</th><th class="l">Concern?</th></tr>'+rows.map(r=>{const vv=String(r.velocity),c=vv.startsWith('Concern')?'bad':vv.startsWith('Likely')?'good':'';const ck=String(r.check||'').replace('Former RNDC: ask Reyes','Former RNDC, check Reyes').replace('Distributor slow to report: verify','Distributor slow to report');
+ return `<tr>${acct(r)}<td class="l">${esc(r.brands)}</td><td>${f0(r.ytd)}</td><td>${esc(r.last_month)}</td><td>${f0(r.last_month_cases)}</td><td class="l ${c}">${esc(vv)}${ck?`<div class="s">${esc(ck)}</div>`:''}</td></tr>`}).join('');}
+$('lostst').onchange=lost;$('lostv').onchange=lost;lost();
+</script>
+</body>
+</html>
