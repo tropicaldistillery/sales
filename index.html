@@ -56,7 +56,7 @@ footer{color:var(--muted);font-size:12px;border-top:1px solid var(--line);paddin
   <div class="upd">Updated <b id="upd"></b><br><span id="srcline"></span></div>
 </header>
 <nav>
-  <a href="#summary">Summary</a><a href="#risks">Call-outs</a><a href="#states">By state</a><a href="#brands">By brand</a><a href="#r12">Rolling 12</a><a href="#inventory">Inventory &amp; POs</a><a href="#pending">Pending shipments</a><a href="#newaccts">New accounts</a><a href="#lost">Lost accounts</a>
+  <a href="#summary">Summary</a><a href="#risks">Call-outs</a><a href="#states">By state</a><a href="#brands">By brand</a><a href="#r12">Rolling 12</a><a href="#natl">National accounts</a><a href="#inventory">Inventory &amp; POs</a><a href="#pending">Pending shipments</a><a href="#newaccts">New accounts</a><a href="#lost">Lost accounts</a>
 </nav>
 <main>
 <section id="summary">
@@ -76,6 +76,14 @@ footer{color:var(--muted);font-size:12px;border-top:1px solid var(--line);paddin
   <p class="lede" id="r12lede"></p>
   <div class="bar"><label for="r12st">Show</label><select id="r12st"></select></div>
   <div class="tw"><table id="r12t" class="r12"></table></div>
+</section>
+<section id="natl">
+  <h2>National account tracker</h2>
+  <p class="sub" id="natlsub"></p>
+  <div class="bar"><label for="natlch">Account</label><select id="natlch"></select></div>
+  <p class="lede" id="natllede"></p>
+  <div class="tw"><table id="natlst" class="r12"></table></div>
+  <div class="tw scroll" style="margin-top:14px"><table id="natlt" class="r12"></table></div>
 </section>
 <section id="inventory">
   <h2>Inventory and PO flags</h2>
@@ -147,6 +155,36 @@ if(R.length){
   $('r12t').innerHTML=hd+rows.map(r=>row(esc(r.sku),r)).join('')+row('Total, '+esc(s),tot(rows),1);}
  $('r12st').onchange=r12;r12();
 }else{$('r12').style.display='none';}
+// national accounts
+const NA=D.national||[];
+if(NA.length){
+ const chains=[...new Set(NA.map(r=>r.chain))].sort();
+ const locKey=r=>r.state+'|'+r.location;
+ const agg=rows=>{const L={};rows.forEach(r=>{const k=locKey(r),g=L[k]||(L[k]={state:r.state,location:r.location,city:r.city,on_list:r.on_list,note:r.note,ytd:0,ly:0,sku:{}});g.ytd+=N(r.ytd);g.ly+=N(r.ly);if(r.sku){g.sku[r.sku]=(g.sku[r.sku]||0)+N(r.ytd)}});return Object.values(L)};
+ const sumry=ch=>{const L=agg(NA.filter(r=>r.chain===ch));return {ch,listed:L.filter(l=>l.on_list==='Yes').length,buy:L.filter(l=>l.ytd>0).length,buyly:L.filter(l=>l.ly>0).length,ytd:sum(L,'ytd'),ly:sum(L,'ly'),L}};
+ const S=chains.map(sumry);
+ $('natlsub').textContent='Depletions in physical cases by location, YTD vs same dates last year, from distributor account-level data (VIP). Locations come from the chain lists; chains without a list are matched by name. Control states (PA, VA, IA, MS) do not report store-level sales.';
+ $('natlch').innerHTML='<option value="">All accounts (summary)</option>'+chains.map(c=>`<option>${esc(c)}</option>`).join('');
+ const f1=v=>N(v)?(Math.round(N(v)*10)/10).toLocaleString('en-US'):'·';
+ function natl(){const ch=$('natlch').value;
+  if(!ch){const T={ytd:sum(S,'ytd'),ly:sum(S,'ly')};
+   $('natllede').innerHTML=`<b>${f0(T.ytd)}</b> cases YTD across ${chains.length} national accounts, <span class="${cls(T.ytd,T.ly)}">${pct(T.ytd,T.ly)}</span> vs last year. <b>${sum(S,'buy')}</b> locations buying.`;
+   $('natlst').innerHTML='<tr><th class="l">Account</th><th>Locations on list</th><th>Buying YTD</th><th>Buying LY</th><th>Cases YTD</th><th>Cases LY</th><th>Change</th></tr>'+S.slice().sort((a,b)=>b.ytd-a.ytd).map(s=>`<tr><td class="l"><a href="#natl" data-c="${esc(s.ch)}">${esc(s.ch)}</a></td><td>${s.listed||'name match'}</td><td>${s.buy}</td><td>${s.buyly}</td><td>${f0(s.ytd)}</td><td>${f0(s.ly)}</td><td class="${cls(s.ytd,s.ly)}">${pct(s.ytd,s.ly)}</td></tr>`).join('')+`<tr class="tot"><td class="l">Total</td><td>${sum(S,'listed')}</td><td>${sum(S,'buy')}</td><td>${sum(S,'buyly')}</td><td>${f0(T.ytd)}</td><td>${f0(T.ly)}</td><td class="${cls(T.ytd,T.ly)}">${pct(T.ytd,T.ly)}</td></tr>`;
+   $('natlst').querySelectorAll('a[data-c]').forEach(a=>a.onclick=e=>{e.preventDefault();$('natlch').value=a.dataset.c;natl();});
+   $('natlt').innerHTML='';return;}
+  const s=S.find(x=>x.ch===ch),L=s.L,skus=[...new Set(NA.filter(r=>r.chain===ch&&r.sku&&N(r.ytd)).map(r=>r.sku))];
+  const skuTot=k=>sum(L.map(l=>({v:l.sku[k]||0})),'v');skus.sort((a,b)=>skuTot(b)-skuTot(a));
+  let mand='';if(ch==='Hard Rock'){const both=L.filter(l=>l.on_list==='Yes'&&(l.sku['Mango']||0)>0&&(l.sku['Lychee']||0)>0).length;mand=` Mandate check (Mango + Lychee): <b>${both}</b> of ${s.listed} listed locations bought both this year.`;}
+  $('natllede').innerHTML=`<b>${f0(s.ytd)}</b> cases YTD, <span class="${cls(s.ytd,s.ly)}">${pct(s.ytd,s.ly)}</span> vs last year (${f0(s.ly)}). <b>${s.buy}</b> locations buying${s.listed?` of ${s.listed} on the list`:''}, vs ${s.buyly} last year.${mand}`;
+  const st={};L.forEach(l=>{const g=st[l.state]||(st[l.state]={state:l.state,listed:0,buy:0,ytd:0,ly:0});g.listed+=l.on_list==='Yes'?1:0;g.buy+=l.ytd>0?1:0;g.ytd+=l.ytd;g.ly+=l.ly});
+  const SR=Object.values(st).sort((a,b)=>b.ytd-a.ytd||b.listed-a.listed);
+  $('natlst').innerHTML='<tr><th class="l">State</th><th>Locations on list</th><th>Buying YTD</th><th>Cases YTD</th><th>Cases LY</th><th>Change</th></tr>'+SR.map(r=>`<tr><td class="l">${esc(r.state)}</td><td>${r.listed}</td><td>${r.buy}</td><td>${f0(r.ytd)}</td><td>${f0(r.ly)}</td><td class="${cls(r.ytd,r.ly)}">${N(r.ytd)||N(r.ly)?pct(r.ytd,r.ly):''}</td></tr>`).join('')+`<tr class="tot"><td class="l">Total, ${esc(ch)}</td><td>${s.listed}</td><td>${s.buy}</td><td>${f0(s.ytd)}</td><td>${f0(s.ly)}</td><td class="${cls(s.ytd,s.ly)}">${pct(s.ytd,s.ly)}</td></tr>`;
+  const hd=`<tr><th class="l">Location</th>${skus.map(k=>`<th>${esc(k)}</th>`).join('')}<th>YTD</th><th>LY</th><th class="l">Note</th></tr>`;
+  let body='';SR.forEach(g=>{const ls=L.filter(l=>l.state===g.state).sort((a,b)=>b.ytd-a.ytd||b.ly-a.ly||a.location.localeCompare(b.location));
+   body+=`<tr class="tot"><td class="l" colspan="${skus.length+4}">${esc(g.state)}: ${g.buy} buying${g.listed?' of '+g.listed:''}</td></tr>`+ls.map(l=>`<tr><td class="l">${esc(l.location)}<div class="s">${esc(l.city)}${l.on_list!=='Yes'?' · not on list, matched by name':''}</div></td>${skus.map(k=>`<td>${f1(l.sku[k])}</td>`).join('')}<td><b>${f1(l.ytd)}</b></td><td>${f1(l.ly)}</td><td class="l s">${esc(l.note)}</td></tr>`).join('');});
+  $('natlt').innerHTML=hd+body;}
+ $('natlch').onchange=natl;natl();
+}else{$('natl').style.display='none';}
 // inventory
 const now=D.inventory.filter(r=>r.status==='Order now');const byS={};now.forEach(r=>byS[r.state]=(byS[r.state]||0)+N(r.suggested_po));
 $('invlede').innerHTML=`<b>${now.length}</b> SKUs need a PO now (<b>${f0(sum(now,'suggested_po'))}</b> cases): ${Object.entries(byS).sort((a,b)=>b[1]-a[1]).map(([s,n])=>esc(s)+' '+f0(n)).join(' · ')}.`;
