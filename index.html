@@ -75,6 +75,7 @@ footer{color:var(--muted);font-size:12px;border-top:1px solid var(--line);paddin
   <p class="lede" id="citylede"></p>
   <div class="bar"><label for="cityst">State</label><select id="cityst"></select><span class="sub" id="cityshown"></span></div>
   <div class="tw scroll"><table id="cityt"></table></div>
+  <div id="cityacc" style="display:none;margin-top:18px"><h3 id="cityacch" style="margin:0 0 4px"></h3><p class="sub">Cases YTD by SKU. Click another city above to switch.</p><div class="tw scroll"><table id="cityacct"></table></div></div>
 </section>
 <section id="brands"><h2>By brand</h2><p class="sub">Casa Loco is a commission brand and isn't counted in totals.</p><div class="tw"><table id="brt"></table></div></section>
 <section id="r12">
@@ -228,8 +229,13 @@ if(C.length){picker('cityst',C);
  const top=C.slice().sort((a,b)=>N(b.cases_ytd)-N(a.cases_ytd)).slice(0,5).map(r=>esc(r.city)).join(', ');
  $('citylede').innerHTML=`<b>${f0(ca)}</b> accounts buying across <b>${f0(C.filter(r=>N(r.accts_ytd)).length)}</b> cities (${f0(cl)} last year), <b>${f0(cy)}</b> cases, <span class="${cls(cy,cp)}">${pct(cy,cp)}</span>. Top cities: ${top}.`;
  function cityt(){const s=$('cityst').value,rows=C.filter(r=>!s||r.state===s).sort((a,b)=>N(b.cases_ytd)-N(a.cases_ytd));$('cityshown').textContent=rows.length+' shown';
-  $('cityt').innerHTML='<tr><th class="l">City</th><th>Accounts YTD</th><th>Accounts LY</th><th>Cases YTD</th><th>Cases LY</th><th>Change</th><th>New</th><th>Lost</th></tr>'+rows.map(r=>`<tr><td class="l">${esc(r.city)}<div class="s">${esc(r.state)}</div></td><td>${f0(r.accts_ytd)}</td><td>${f0(r.accts_ly)}</td><td>${f0(r.cases_ytd)}</td><td>${f0(r.cases_ly)}</td><td class="${cls(r.cases_ytd,r.cases_ly)}">${N(r.cases_ly)?pct(r.cases_ytd,r.cases_ly):''}</td><td>${N(r.new)||''}</td><td class="${N(r.lost)?'bad':''}">${N(r.lost)||''}</td></tr>`).join('');}
- $('cityst').onchange=cityt;cityt();} else $('cities').style.display='none';
+  $('cityt').innerHTML='<tr><th class="l">City</th><th>Accounts YTD</th><th>Accounts LY</th><th>Cases YTD</th><th>Cases LY</th><th>Change</th><th>New</th><th>Lost</th></tr>'+rows.map(r=>`<tr><td class="l"><a href="#cityacc" data-city="${esc(r.city)}" data-st="${esc(r.state)}">${esc(r.city)}</a><div class="s">${esc(r.state)}</div></td><td>${f0(r.accts_ytd)}</td><td>${f0(r.accts_ly)}</td><td>${f0(r.cases_ytd)}</td><td>${f0(r.cases_ly)}</td><td class="${cls(r.cases_ytd,r.cases_ly)}">${N(r.cases_ly)?pct(r.cases_ytd,r.cases_ly):''}</td><td>${N(r.new)||''}</td><td class="${N(r.lost)?'bad':''}">${N(r.lost)||''}</td></tr>`).join('');}
+ $('cityst').onchange=cityt;cityt();
+ const CA=D.city_accounts||[],SK=[['lychee','Lychee'],['espresso','Espresso'],['key_lime_pie','Key Lime Pie'],['mango','Mango'],['orange','Orange'],['citrus','Citrus'],['td_vodka','TD Vodka'],['twin_p','Twin P'],['casa_loco','Casa Loco']];
+ function cityacc(city,st){const rows=CA.filter(r=>r.city===city&&r.state===st).sort((a,b)=>N(b.ytd)-N(a.ytd));const used=SK.filter(([k])=>rows.some(r=>N(r[k])));
+  $('cityacc').style.display='';$('cityacch').textContent=`${city}, ${st}: ${rows.length} accounts`;
+  $('cityacct').innerHTML='<tr><th class="l">Account</th>'+used.map(([k,l])=>`<th>${l}</th>`).join('')+'<th>Total YTD</th><th>LY</th></tr>'+rows.map(r=>`<tr><td class="l">${esc(r.account)}<div class="s">${esc(r.premise||'')}</div></td>${used.map(([k])=>`<td>${N(r[k])?f0(r[k]):'·'}</td>`).join('')}<td><b>${f0(r.ytd)}</b></td><td>${f0(r.ly)}</td></tr>`).join('');}
+ $('cityt').addEventListener('click',e=>{const a=e.target.closest('a[data-city]');if(!a)return;e.preventDefault();cityacc(a.dataset.city,a.dataset.st);$('cityacc').scrollIntoView({behavior:'smooth'});});} else $('cities').style.display='none';
 </script>
 </body>
 </html>
