@@ -9,7 +9,7 @@ Column order and names must stay the same; index.html reads them by name.
 """
 import csv, json, os, sys
 
-TABLES = ["portfolio", "states", "brands", "monthly", "inventory", "pending", "new_accounts", "lost", "r12", "national"]
+TABLES = ["portfolio", "states", "brands", "monthly", "inventory", "pending", "new_accounts", "lost", "r12", "national", "cities"]
 META = ["updated", "day", "notes", "risks", "r12_months"]
 
 
@@ -63,7 +63,11 @@ def build(src, js):
 
     d = {}
     for t in TABLES:
-        with open(os.path.join(src, t + ".csv"), encoding="utf-8") as f:
+        p_ = os.path.join(src, t + ".csv")
+        if not os.path.exists(p_):
+            d[t] = []
+            continue
+        with open(p_, encoding="utf-8") as f:
             d[t] = [{k: cast(t, k, v) for k, v in r.items()} for r in csv.DictReader(f)]
     d.update(meta)
     # sanity checks
