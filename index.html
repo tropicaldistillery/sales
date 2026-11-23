@@ -56,7 +56,7 @@ footer{color:var(--muted);font-size:12px;border-top:1px solid var(--line);paddin
   <div class="upd">Updated <b id="upd"></b><br><span id="srcline"></span></div>
 </header>
 <nav>
-  <a href="#summary">Summary</a><a href="#risks">Call-outs</a><a href="#states">By state</a><a href="#brands">By brand</a><a href="#r12">Rolling 12</a><a href="#natl">National accounts</a><a href="#inventory">Inventory &amp; POs</a><a href="#pending">Pending shipments</a><a href="#newaccts">New accounts</a><a href="#lost">Lost accounts</a>
+  <a href="#summary">Summary</a><a href="#risks">Call-outs</a><a href="#states">By state</a><a href="#cities">By city</a><a href="#brands">By brand</a><a href="#r12">Rolling 12</a><a href="#natl">National accounts</a><a href="#inventory">Inventory &amp; POs</a><a href="#pending">Pending shipments</a><a href="#newaccts">New accounts</a><a href="#lost">Lost accounts</a>
 </nav>
 <main>
 <section id="summary">
@@ -68,6 +68,13 @@ footer{color:var(--muted);font-size:12px;border-top:1px solid var(--line);paddin
   <p class="sub">Sorted by shipments. Depletions: Reyes states from Power BI, Texas from RNDC MicroStrategy, Monarq/LibDib/Mississippi = shipments, all others (incl. CA/NV) from VIP. MTD is month to date (see the data notes for through-dates).</p>
   <div class="tw"><table id="stt"></table></div>
   <p class="note"><b>* Bailment states (Pennsylvania, Virginia, Iowa): depletions are not accurate.</b> Use shipments until we pull the state sales reports. California last year includes a one-time 1,600-case Cursed Cranberry order.</p>
+</section>
+<section id="cities">
+  <h2>Accounts by city</h2>
+  <p class="sub">Accounts buying and cases by city, YTD vs same dates last year, from distributor account-level data (VIP). New and lost counts come from the account lists below.</p>
+  <p class="lede" id="citylede"></p>
+  <div class="bar"><label for="cityst">State</label><select id="cityst"></select><span class="sub" id="cityshown"></span></div>
+  <div class="tw scroll"><table id="cityt"></table></div>
 </section>
 <section id="brands"><h2>By brand</h2><p class="sub">Casa Loco is a commission brand and isn't counted in totals.</p><div class="tw"><table id="brt"></table></div></section>
 <section id="r12">
@@ -214,6 +221,15 @@ function lost(){const s=$('lostst').value,v=$('lostv').value,rows=D.lost.filter(
  $('lostt').innerHTML='<tr><th>Account</th><th class="l">Brands</th><th>Cases YTD</th><th>Last month bought</th><th>Cases that month</th><th class="l">Concern?</th></tr>'+rows.map(r=>{const vv=String(r.velocity),c=vv.startsWith('Concern')?'bad':vv.startsWith('Likely')?'good':'';const ck=String(r.check||'').replace('Former RNDC: ask Reyes','Former RNDC, check Reyes').replace('Distributor slow to report: verify','Distributor slow to report');
  return `<tr>${acct(r)}<td class="l">${esc(r.brands)}</td><td>${f0(r.ytd)}</td><td>${esc(r.last_month)}</td><td>${f0(r.last_month_cases)}</td><td class="l ${c}">${esc(vv)}${ck?`<div class="s">${esc(ck)}</div>`:''}</td></tr>`}).join('');}
 $('lostst').onchange=lost;$('lostv').onchange=lost;lost();
+// accounts by city
+const C=D.cities||[];
+if(C.length){picker('cityst',C);
+ const ca=sum(C,'accts_ytd'),cl=sum(C,'accts_ly'),cy=sum(C,'cases_ytd'),cp=sum(C,'cases_ly');
+ const top=C.slice().sort((a,b)=>N(b.cases_ytd)-N(a.cases_ytd)).slice(0,5).map(r=>esc(r.city)).join(', ');
+ $('citylede').innerHTML=`<b>${f0(ca)}</b> accounts buying across <b>${f0(C.filter(r=>N(r.accts_ytd)).length)}</b> cities (${f0(cl)} last year), <b>${f0(cy)}</b> cases, <span class="${cls(cy,cp)}">${pct(cy,cp)}</span>. Top cities: ${top}.`;
+ function cityt(){const s=$('cityst').value,rows=C.filter(r=>!s||r.state===s).sort((a,b)=>N(b.cases_ytd)-N(a.cases_ytd));$('cityshown').textContent=rows.length+' shown';
+  $('cityt').innerHTML='<tr><th class="l">City</th><th>Accounts YTD</th><th>Accounts LY</th><th>Cases YTD</th><th>Cases LY</th><th>Change</th><th>New</th><th>Lost</th></tr>'+rows.map(r=>`<tr><td class="l">${esc(r.city)}<div class="s">${esc(r.state)}</div></td><td>${f0(r.accts_ytd)}</td><td>${f0(r.accts_ly)}</td><td>${f0(r.cases_ytd)}</td><td>${f0(r.cases_ly)}</td><td class="${cls(r.cases_ytd,r.cases_ly)}">${N(r.cases_ly)?pct(r.cases_ytd,r.cases_ly):''}</td><td>${N(r.new)||''}</td><td class="${N(r.lost)?'bad':''}">${N(r.lost)||''}</td></tr>`).join('');}
+ $('cityst').onchange=cityt;cityt();} else $('cities').style.display='none';
 </script>
 </body>
 </html>
