@@ -75,7 +75,7 @@ footer{color:var(--muted);font-size:12px;border-top:1px solid var(--line);paddin
   <p class="lede" id="citylede"></p>
   <div class="bar"><label for="cityst">State</label><select id="cityst"></select><span class="sub" id="cityshown"></span></div>
   <div class="tw scroll"><table id="cityt"></table></div>
-  <div id="cityacc" style="display:none;margin-top:18px"><h3 id="cityacch" style="margin:0 0 4px"></h3><p class="sub">Cases YTD by SKU. Click another city above to switch.</p><div class="tw scroll"><table id="cityacct"></table></div></div>
+  <div id="cityacc" style="display:none;margin-top:18px"><h3 id="cityacch" style="margin:0 0 4px"></h3><p class="sub">Cases YTD by SKU, with address and last purchase date (VIP). Click another city above to switch.</p><div class="tw scroll"><table id="cityacct"></table></div></div>
 </section>
 <section id="brands"><h2>By brand</h2><p class="sub">Casa Loco is a commission brand and isn't counted in totals.</p><div class="tw"><table id="brt"></table></div></section>
 <section id="r12">
@@ -117,7 +117,7 @@ footer{color:var(--muted);font-size:12px;border-top:1px solid var(--line);paddin
 </section>
 <p class="sub" id="notes"></p>
 </main>
-<footer>Tropical Distillery · internal sales report · please don't forward<div style="margin-top:8px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="3 1 42 43" width="16" height="16" role="img" aria-label="SipScale bottle mark" style="vertical-align:-3px;margin-right:5px"><rect x="4.5" y="28" width="11" height="14" rx="4.5" fill="#D9962B"/><rect x="7.5" y="23.5" width="5" height="5.5" rx="1.6" fill="#D9962B"/><rect x="6.6" y="21" width="6.8" height="3.2" rx="1.4" fill="#17232B"/><rect x="19" y="21" width="9.5" height="21" rx="2" fill="#0F7F73"/><rect x="21.7" y="13" width="4" height="9" rx="1.3" fill="#0F7F73"/><rect x="20.9" y="10" width="5.6" height="3.4" rx="1.4" fill="#17232B"/><path d="M32 42V25l3.2-5.5V6h4.6v13.5L43 25v17Z" fill="#1F9568"/><rect x="34.4" y="2.6" width="6.2" height="3.6" rx="1.5" fill="#17232B"/></svg>Powered by SipScale</div></footer>
+<footer><div><svg xmlns="http://www.w3.org/2000/svg" viewBox="3 1 42 43" width="16" height="16" role="img" aria-label="SipScale bottle mark" style="vertical-align:-3px;margin-right:5px"><rect x="4.5" y="28" width="11" height="14" rx="4.5" fill="#D9962B"/><rect x="7.5" y="23.5" width="5" height="5.5" rx="1.6" fill="#D9962B"/><rect x="6.6" y="21" width="6.8" height="3.2" rx="1.4" fill="#17232B"/><rect x="19" y="21" width="9.5" height="21" rx="2" fill="#0F7F73"/><rect x="21.7" y="13" width="4" height="9" rx="1.3" fill="#0F7F73"/><rect x="20.9" y="10" width="5.6" height="3.4" rx="1.4" fill="#17232B"/><path d="M32 42V25l3.2-5.5V6h4.6v13.5L43 25v17Z" fill="#1F9568"/><rect x="34.4" y="2.6" width="6.2" height="3.6" rx="1.5" fill="#17232B"/></svg>Powered by SipScale</div></footer>
 <script src="data.js"></script>
 <script>
 const D=window.D,N=v=>+v||0,f0=v=>Math.round(N(v)).toLocaleString('en-US'),fd=v=>'$'+Math.round(N(v)).toLocaleString('en-US');
@@ -232,9 +232,10 @@ if(C.length){picker('cityst',C);
   $('cityt').innerHTML='<tr><th class="l">City</th><th>Accounts YTD</th><th>Accounts LY</th><th>Cases YTD</th><th>Cases LY</th><th>Change</th><th>New</th><th>Lost</th></tr>'+rows.map(r=>`<tr><td class="l"><a href="#cityacc" data-city="${esc(r.city)}" data-st="${esc(r.state)}">${esc(r.city)}</a><div class="s">${esc(r.state)}</div></td><td>${f0(r.accts_ytd)}</td><td>${f0(r.accts_ly)}</td><td>${f0(r.cases_ytd)}</td><td>${f0(r.cases_ly)}</td><td class="${cls(r.cases_ytd,r.cases_ly)}">${N(r.cases_ly)?pct(r.cases_ytd,r.cases_ly):''}</td><td>${N(r.new)||''}</td><td class="${N(r.lost)?'bad':''}">${N(r.lost)||''}</td></tr>`).join('');}
  $('cityst').onchange=cityt;cityt();
  const CA=D.city_accounts||[],SK=[['lychee','Lychee'],['espresso','Espresso'],['key_lime_pie','Key Lime Pie'],['mango','Mango'],['orange','Orange'],['citrus','Citrus'],['td_vodka','TD Vodka'],['twin_p','Twin P'],['casa_loco','Casa Loco']];
+ const lbd=d=>{const [y,m,dd]=d.split('-');return `${+m}/${+dd}/${y.slice(2)}`};
  function cityacc(city,st){const rows=CA.filter(r=>r.city===city&&r.state===st).sort((a,b)=>N(b.ytd)-N(a.ytd));const used=SK.filter(([k])=>rows.some(r=>N(r[k])));
   $('cityacc').style.display='';$('cityacch').textContent=`${city}, ${st}: ${rows.length} accounts`;
-  $('cityacct').innerHTML='<tr><th class="l">Account</th>'+used.map(([k,l])=>`<th>${l}</th>`).join('')+'<th>Total YTD</th><th>LY</th></tr>'+rows.map(r=>`<tr><td class="l">${esc(r.account)}<div class="s">${esc(r.premise||'')}</div></td>${used.map(([k])=>`<td>${N(r[k])?f0(r[k]):'·'}</td>`).join('')}<td><b>${f0(r.ytd)}</b></td><td>${f0(r.ly)}</td></tr>`).join('');}
+  $('cityacct').innerHTML='<tr><th class="l">Account</th>'+used.map(([k,l])=>`<th>${l}</th>`).join('')+'<th>Total YTD</th><th>LY</th><th>Last buy</th></tr>'+rows.map(r=>`<tr><td class="l">${esc(r.account)}<div class="s">${esc([r.address,r.premise].filter(Boolean).join(' · '))}</div></td>${used.map(([k])=>`<td>${N(r[k])?f0(r[k]):'·'}</td>`).join('')}<td><b>${f0(r.ytd)}</b></td><td>${f0(r.ly)}</td><td>${r.last_buy?lbd(r.last_buy):'2025 only'}</td></tr>`).join('');}
  $('cityt').addEventListener('click',e=>{const a=e.target.closest('a[data-city]');if(!a)return;e.preventDefault();cityacc(a.dataset.city,a.dataset.st);$('cityacc').scrollIntoView({behavior:'smooth'});});} else $('cities').style.display='none';
 </script>
 </body>
