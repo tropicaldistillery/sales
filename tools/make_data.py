@@ -9,7 +9,7 @@ Column order and names must stay the same; index.html reads them by name.
 """
 import csv, json, os, sys
 
-TABLES = ["portfolio", "states", "brands", "monthly", "inventory", "pending", "new_accounts", "lost", "r12", "national", "cities"]
+TABLES = ["portfolio", "states", "brands", "monthly", "inventory", "pending", "new_accounts", "lost", "r12", "national", "cities", "city_accounts"]
 META = ["updated", "day", "notes", "risks", "r12_months"]
 
 
