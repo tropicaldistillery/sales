@@ -124,8 +124,10 @@ def main(loc_path, ytd_path, ly_path, out_path, meta_path):
         if i in hit:
             continue
         st = l["state"].strip()
+        # control states (no store-level depletions): cases come from the note, e.g. "1 CS Mango"
+        m = re.search(r"(\d+) CS ([A-Z][A-Za-z' ]+?)(?= ·|$)", l.get("note", "") or "") if st in CONTROL else None
         rows.append(dict(chain=l["chain"], state=st, location=l["location"], city=str(l["city"]).strip().title(),
-                         account="", on_list="Yes", sku="", ytd=0, ly=0,
+                         account="", on_list="Yes", sku=m.group(2) if m else "", ytd=int(m.group(1)) if m else 0, ly=0,
                          note=l.get("note", "") or ("Control state: no store-level depletions" if st in CONTROL else "")))
     rows.sort(key=lambda r: (r["chain"], r["state"], r["location"], r["sku"]))
     for n, r in enumerate(rows, 1):
